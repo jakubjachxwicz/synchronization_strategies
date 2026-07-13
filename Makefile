@@ -11,7 +11,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-$(BUILD)/main.o: main.c strategies/fmutex.h | $(BUILD)
+$(BUILD)/main.o: main.c strategies/fmutex.h strategies/adaptive_mutex.h | $(BUILD)
 	$(CC) $(CFLAGS) -c main.c -o $(BUILD)/main.o
 
 $(BUILD)/futex.o: strategies/futex.c strategies/futex.h | $(BUILD)
