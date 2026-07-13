@@ -1,14 +1,20 @@
+// #define FUTEX_MUTEX
+#define ADAPTIVE_MUTEX
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 
 #include "strategies/fmutex.h"
+#include "strategies/adaptive_mutex.h"
 
 #define NUM_THREADS 8
 #define ITERS 1000000
 
 static fmutex_t mutex = FMUTEX_INIT;
+static ad_mutex_t ad_mutex = AD_MUTEX_INIT;
 
 static long shared_counter = 0;
 
@@ -23,9 +29,16 @@ void *worker(void *arg)
 
     for (int i = 0; i < ITERS; i++) 
     {
+        #ifdef FUTEX_MUTEX
         fmutex_lock(&mutex);
         shared_counter++;
         fmutex_unlock(&mutex);
+
+        #elifdef ADAPTIVE_MUTEX
+        am_lock(&ad_mutex);
+        shared_counter++;
+        am_unlock(&ad_mutex);
+        #endif
     }
 
     printf("Thread %d finished\n", targ->thread_id);
