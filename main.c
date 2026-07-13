@@ -1,9 +1,16 @@
 #include <stdio.h>
 
+#include "strategies/futex.h"
 
-int main(int argc, char *argv[]) 
+static futex_t futex;
+
+int main() 
 {
     printf("Hello, World!\n");
+
+    futex_wait(&futex, 0);
+
+    printf("Hello again!\n");
 
     return 0;
 }
