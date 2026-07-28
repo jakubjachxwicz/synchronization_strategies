@@ -1,5 +1,6 @@
 // #define FUTEX_MUTEX
-#define ADAPTIVE_MUTEX
+// #define ADAPTIVE_MUTEX
+#define MCS_LOCK
 
 
 #include <stdio.h>
@@ -9,12 +10,14 @@
 
 #include "strategies/fmutex.h"
 #include "strategies/adaptive_mutex.h"
+#include "strategies/mcs_lock.h"
 
 #define NUM_THREADS 8
 #define ITERS 1000000
 
 static fmutex_t mutex = FMUTEX_INIT;
 static ad_mutex_t ad_mutex = AD_MUTEX_INIT;
+static mcs_lock_t mcs_lock = MCS_LOCK_INIT;
 
 static long shared_counter = 0;
 
@@ -38,6 +41,13 @@ void *worker(void *arg)
         am_lock(&ad_mutex);
         shared_counter++;
         am_unlock(&ad_mutex);
+
+        #elifdef MCS_LOCK
+        // thread's node, stored on stack
+        qnode_t node;
+        mcs_acquire(&mcs_lock, &node);
+        shared_counter++;
+        mcs_release(&mcs_lock, &node);
         #endif
     }
 

@@ -2,7 +2,7 @@ CC      = cc
 CFLAGS  = -Wall -Wextra -O2 -pthread -Istrategies
 BUILD   = build
 TARGET  = $(BUILD)/main
-OBJS    = $(BUILD)/main.o $(BUILD)/futex.o $(BUILD)/fmutex.o $(BUILD)/adaptive_mutex.o
+OBJS    = $(BUILD)/main.o $(BUILD)/futex.o $(BUILD)/fmutex.o $(BUILD)/adaptive_mutex.o $(BUILD)/mcs_lock.o
 
 .PHONY: all clean
 
@@ -22,6 +22,9 @@ $(BUILD)/fmutex.o: strategies/fmutex.c strategies/fmutex.h strategies/futex.h | 
 
 $(BUILD)/adaptive_mutex.o: strategies/adaptive_mutex.c strategies/adaptive_mutex.h strategies/futex.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/adaptive_mutex.c -o $(BUILD)/adaptive_mutex.o
+
+$(BUILD)/mcs_lock.o: strategies/mcs_lock.c strategies/mcs_lock.h | $(BUILD)
+	$(CC) $(CFLAGS) -c strategies/mcs_lock.c -o $(BUILD)/mcs_lock.o
 
 $(BUILD):
 	mkdir -p $(BUILD)
