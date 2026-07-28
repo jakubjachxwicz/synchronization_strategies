@@ -7,14 +7,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct qnode {
-    struct qnode *_Atomic next;
+#define MCS_LOCK_INIT 0
+
+typedef struct qnode_t {
+    struct qnode_t *_Atomic next;
     _Atomic bool locked;
-} qnode;
+} qnode_t;
 
-typedef struct qnode *_Atomic mcs_lock;
+typedef struct qnode_t *_Atomic mcs_lock_t;
 
-void mcs_acquire(mcs_lock *L, qnode *I);
-void mcs_release(mcs_lock *L, qnode *I);
+void mcs_acquire(mcs_lock_t *L, qnode_t *I);
+void mcs_release(mcs_lock_t *L, qnode_t *I);
 
 #endif

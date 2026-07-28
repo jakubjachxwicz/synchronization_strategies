@@ -1,10 +1,10 @@
 #include "mcs_lock.h"
 
-void mcs_acquire(mcs_lock *L, qnode *I)
+void mcs_acquire(mcs_lock_t *L, qnode_t *I)
 {
     atomic_store(&I->next, NULL);
 
-    qnode *pred = atomic_exchange(L, I);
+    qnode_t *pred = atomic_exchange(L, I);
     if (pred != NULL)
     {
         atomic_store(&I->locked, true);
@@ -15,13 +15,13 @@ void mcs_acquire(mcs_lock *L, qnode *I)
     }  
 }
 
-void mcs_release(mcs_lock *L, qnode *I) 
+void mcs_release(mcs_lock_t *L, qnode_t *I) 
 {
-    qnode *succ = atomic_load(&I->next);
+    qnode_t *succ = atomic_load(&I->next);
 
     if (succ == NULL)
     {
-        qnode *expected = I;
+        qnode_t *expected = I;
         if (atomic_compare_exchange_strong(L, &expected, NULL))
             return;
 
