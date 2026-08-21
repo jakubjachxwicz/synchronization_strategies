@@ -1,5 +1,6 @@
 #include "futex.h"
 #include "fmutex.h"
+#include "sync_interface.h"
 
 #include <stdatomic.h>
 #include <stdlib.h>
@@ -37,3 +38,22 @@ void fmutex_unlock(fmutex_t *m)
         futex_wake(m, 1);
     }
 }
+
+static fmutex_t g_fmutex;
+
+static void fmutex_global_init(void)    { g_fmutex = 0; }
+static void fmutex_global_destroy(void) { }
+static void *fmutex_ctx_create(void)    { return NULL; }   // nie potrzebuje kontekstu
+static void fmutex_ctx_destroy(void *c) { (void)c; }
+static void fmutex_lock_adapter(void *c)   { (void)c; fmutex_lock(&g_fmutex); }
+static void fmutex_unlock_adapter(void *c) { (void)c; fmutex_unlock(&g_fmutex); }
+
+const sync_strategy_t strategy_futex = {
+    .name = "futex",
+    .global_init = fmutex_global_init,
+    .global_destroy = fmutex_global_destroy,
+    .thread_ctx_create = fmutex_ctx_create,
+    .thread_ctx_destroy = fmutex_ctx_destroy,
+    .lock = fmutex_lock_adapter,
+    .unlock = fmutex_unlock_adapter,
+};

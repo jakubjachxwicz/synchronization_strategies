@@ -1,100 +1,36 @@
-// #define FUTEX_MUTEX
-// #define ADAPTIVE_MUTEX
-#define MCS_LOCK
-
-
 #include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <time.h>
+#include "simulation/benchmark.h"
 
-#include "strategies/fmutex.h"
-#include "strategies/adaptive_mutex.h"
-#include "strategies/mcs_lock.h"
+extern const sync_strategy_t strategy_futex;
 
-#define NUM_THREADS 8
-#define ITERS 1000000
-
-static fmutex_t mutex = FMUTEX_INIT;
-static ad_mutex_t ad_mutex = AD_MUTEX_INIT;
-static mcs_lock_t mcs_lock = MCS_LOCK_INIT;
-
-static long shared_counter = 0;
-
-typedef struct {
-    int thread_id;
-} thread_arg_t;
-
-void *worker(void *arg)
+int main(void)
 {
-    thread_arg_t *targ = (thread_arg_t *)arg;
-    printf("Thread %d starting...\n", targ->thread_id);
+    const sync_strategy_t *strategies[] = {
+        &strategy_futex
+    };
+    int thread_counts[] = {1, 2, 4, 8, 16};
+    long critical_ns_values[] = {0, 100, 1000, 10000};
 
-    for (int i = 0; i < ITERS; i++) 
-    {
-        #ifdef FUTEX_MUTEX
-        fmutex_lock(&mutex);
-        shared_counter++;
-        fmutex_unlock(&mutex);
+    printf("strategy,threads,critical_ns,elapsed_sec,ops_per_sec,correct\n");
 
-        #elifdef ADAPTIVE_MUTEX
-        am_lock(&ad_mutex);
-        shared_counter++;
-        am_unlock(&ad_mutex);
+    for (size_t s = 0; s < sizeof(strategies)/sizeof(strategies[0]); s++) {
+        for (size_t t = 0; t < sizeof(thread_counts)/sizeof(thread_counts[0]); t++) {
+            for (size_t c = 0; c < sizeof(critical_ns_values)/sizeof(critical_ns_values[0]); c++) {
 
-        #elifdef MCS_LOCK
-        // thread's node, stored on stack
-        qnode_t node;
-        mcs_acquire(&mcs_lock, &node);
-        shared_counter++;
-        mcs_release(&mcs_lock, &node);
-        #endif
-    }
+                benchmark_config_t cfg = {
+                    .num_threads = thread_counts[t],
+                    .iters_per_thread = 200000,
+                    .critical_section_ns = critical_ns_values[c],
+                    .non_critical_ns = 0,
+                };
 
-    printf("Thread %d finished\n", targ->thread_id);
-    return NULL;
-}
+                benchmark_result_t r = run_benchmark(strategies[s], &cfg);
 
-static double timespec_diff_sec(struct timespec start, struct timespec end)
-{
-    return (end.tv_sec - start.tv_sec)
-         + (end.tv_nsec - start.tv_nsec) / 1e9;
-}
-
-int main(void) 
-{
-    pthread_t threads[NUM_THREADS];
-    thread_arg_t args[NUM_THREADS];
-    struct timespec t_start, t_end;
-
-    clock_gettime(CLOCK_MONOTONIC, &t_start);
-
-    for (int i = 0; i < NUM_THREADS; i++) 
-    {
-        args[i].thread_id = i;
-        if (pthread_create(&threads[i], NULL, worker, &args[i]) != 0) 
-        {
-            perror("pthread_create");
-            exit(EXIT_FAILURE);
+                printf("%s,%d,%ld,%.4f,%.0f,%d\n",
+                       strategies[s]->name, cfg.num_threads, cfg.critical_section_ns,
+                       r.elapsed_sec, r.ops_per_sec, r.correctness_ok);
+            }
         }
     }
-
-    for (int i = 0; i < NUM_THREADS; i++) 
-    {
-        pthread_join(threads[i], NULL);
-    }
-
-    clock_gettime(CLOCK_MONOTONIC, &t_end);
-
-    double elapsed = timespec_diff_sec(t_start, t_end);
-    
-    long expected = NUM_THREADS * ITERS;
-
-    printf("------------------------\n");
-    printf("Expected counter value: %ld\n", expected);
-    printf("Counter value: %ld\n", shared_counter);
-    printf("Time: %.4f s\n", elapsed);
-    printf("Operations per second: %.0f\n", expected / elapsed);
-
     return 0;
 }
