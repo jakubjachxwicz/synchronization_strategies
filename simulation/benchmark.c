@@ -31,8 +31,7 @@ static void *worker(void *arg)
         busy_wait_ns(g_cfg.critical_section_ns);
         g_strategy->unlock(ctx);
 
-        busy_wait_ns(g_cfg.non_critical_ns);  // symuluje pracę MIĘDZY sekcjami -
-                                                // to reguluje "gęstość" kontencji
+        busy_wait_ns(g_cfg.non_critical_ns);
     }
 
     g_strategy->thread_ctx_destroy(ctx);

@@ -6,6 +6,7 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #define MCS_LOCK_INIT 0
 
