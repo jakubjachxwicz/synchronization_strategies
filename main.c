@@ -1,36 +1,74 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <getopt.h>
+#include <string.h>
 #include "simulation/benchmark.h"
 
-extern const sync_strategy_t strategy_futex;
+extern sync_strategy_t strategy_futex;
+extern sync_strategy_t strategy_adaptive_mutex;
+extern sync_strategy_t strategy_mcs_lock;
 
-int main(void)
+static struct option long_options[] = {
+    {"lock",         required_argument, 0, 0},
+    {"threads",      required_argument, 0, 1},
+    {"iters",        required_argument, 0, 2},
+    {"critical",     required_argument, 0, 3},
+    {"non_critical", required_argument, 0, 4},
+    {0,              0,                 0, 0}
+};
+
+int main(int argc, char *argv[])
 {
-    const sync_strategy_t *strategies[] = {
-        &strategy_futex
-    };
-    int thread_counts[] = {1, 2, 4, 8, 16};
-    long critical_ns_values[] = {0, 100, 1000, 10000};
+    char* lock = "futex";
+    int thread_count = 4, iterations = 100000;
+    long critical_section_ns = 10000, non_critical_ns = 10;
+
+    int opt;
+    while ((opt = getopt_long(argc, argv, "l:t:i:c:nc:", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 0: lock = optarg;                      break;
+            case 1: thread_count = atoi(optarg);        break;
+            case 2: iterations = atoi(optarg);          break;
+            case 3: critical_section_ns = atoi(optarg); break;
+            case 4: non_critical_ns = atoi(optarg);     break;
+            default:
+                fprintf(stderr, "Unexpected argument used: %s [--x=<val>] [--y=<val>] [--name=<str>]\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    }
+
+    // TODO: parameters validation and improvements
+
+    sync_strategy_t *strategy;
+    if (strcmp(lock, "futex") == 0)
+    {
+        strategy = &strategy_futex;
+    } else if (strcmp(lock, "ad_mutex") == 0 || strcmp(lock, "adaptive_mutex") == 0 || strcmp(lock, "adaptive") == 0)
+    {
+        strategy = &strategy_adaptive_mutex;
+    } else if (strcmp(lock, "mcs_lock") == 0 || strcmp(lock, "mcs") == 0)
+    {
+        strategy = &strategy_mcs_lock;
+    } else
+    {
+        fprintf(stderr, "Strategy %s not recognized\n", lock);
+        exit(EXIT_FAILURE);
+    }
 
     printf("strategy,threads,critical_ns,elapsed_sec,ops_per_sec,correct\n");
 
-    for (size_t s = 0; s < sizeof(strategies)/sizeof(strategies[0]); s++) {
-        for (size_t t = 0; t < sizeof(thread_counts)/sizeof(thread_counts[0]); t++) {
-            for (size_t c = 0; c < sizeof(critical_ns_values)/sizeof(critical_ns_values[0]); c++) {
+    benchmark_config_t cfg = {
+        .num_threads = thread_count,
+        .iters_per_thread = iterations,
+        .critical_section_ns = critical_section_ns,
+        .non_critical_ns = non_critical_ns,
+    };
 
-                benchmark_config_t cfg = {
-                    .num_threads = thread_counts[t],
-                    .iters_per_thread = 200000,
-                    .critical_section_ns = critical_ns_values[c],
-                    .non_critical_ns = 0,
-                };
+    benchmark_result_t r = run_benchmark(strategy, &cfg);
 
-                benchmark_result_t r = run_benchmark(strategies[s], &cfg);
-
-                printf("%s,%d,%ld,%.4f,%.0f,%d\n",
-                       strategies[s]->name, cfg.num_threads, cfg.critical_section_ns,
-                       r.elapsed_sec, r.ops_per_sec, r.correctness_ok);
-            }
-        }
-    }
+    printf("%s,%d,%ld,%.4f,%.0f,%d\n",
+            strategy->name, cfg.num_threads, cfg.critical_section_ns,
+            r.elapsed_sec, r.ops_per_sec, r.correctness_ok);
+    
     return 0;
 }

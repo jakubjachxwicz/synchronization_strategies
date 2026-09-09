@@ -1,5 +1,6 @@
 #include "futex.h"
 #include "adaptive_mutex.h"
+#include "sync_interface.h"
 
 #include <stdatomic.h>
 #include <stdlib.h>
@@ -58,3 +59,22 @@ void am_unlock(ad_mutex_t *m)
         futex_wake(m, 1);
     }
 }
+
+static ad_mutex_t g_ad_mutex;
+
+static void ad_mutex_global_init(void)    { g_ad_mutex = AD_MUTEX_INIT; }
+static void ad_mutex_global_destroy(void) { }
+static void *ad_mutex_ctx_create(void)    { return NULL; }
+static void ad_mutex_ctx_destroy(void *c) { (void)c; }
+static void ad_mutex_lock_adapter(void *c)   { (void)c; am_lock(&g_ad_mutex); }
+static void ad_mutex_unlock_adapter(void *c) { (void)c; am_unlock(&g_ad_mutex); }
+
+const sync_strategy_t strategy_adaptive_mutex = {
+    .name = "adaptive mutex",
+    .global_init = ad_mutex_global_init,
+    .global_destroy = ad_mutex_global_destroy,
+    .thread_ctx_create = ad_mutex_ctx_create,
+    .thread_ctx_destroy = ad_mutex_ctx_destroy,
+    .lock = ad_mutex_lock_adapter,
+    .unlock = ad_mutex_unlock_adapter,
+};

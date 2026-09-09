@@ -20,10 +20,10 @@ $(BUILD)/futex.o: strategies/futex.c strategies/futex.h | $(BUILD)
 $(BUILD)/fmutex.o: strategies/fmutex.c strategies/fmutex.h strategies/futex.h strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/fmutex.c -o $(BUILD)/fmutex.o
 
-$(BUILD)/adaptive_mutex.o: strategies/adaptive_mutex.c strategies/adaptive_mutex.h strategies/futex.h | $(BUILD)
+$(BUILD)/adaptive_mutex.o: strategies/adaptive_mutex.c strategies/adaptive_mutex.h strategies/futex.h strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/adaptive_mutex.c -o $(BUILD)/adaptive_mutex.o
 
-$(BUILD)/mcs_lock.o: strategies/mcs_lock.c strategies/mcs_lock.h | $(BUILD)
+$(BUILD)/mcs_lock.o: strategies/mcs_lock.c strategies/mcs_lock.h strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/mcs_lock.c -o $(BUILD)/mcs_lock.o
 
 $(BUILD)/benchmark.o: simulation/benchmark.c simulation/benchmark.h strategies/sync_interface.h | $(BUILD)

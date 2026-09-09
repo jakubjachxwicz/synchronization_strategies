@@ -41,9 +41,9 @@ void fmutex_unlock(fmutex_t *m)
 
 static fmutex_t g_fmutex;
 
-static void fmutex_global_init(void)    { g_fmutex = 0; }
+static void fmutex_global_init(void)    { g_fmutex = FMUTEX_INIT; }
 static void fmutex_global_destroy(void) { }
-static void *fmutex_ctx_create(void)    { return NULL; }   // nie potrzebuje kontekstu
+static void *fmutex_ctx_create(void)    { return NULL; }
 static void fmutex_ctx_destroy(void *c) { (void)c; }
 static void fmutex_lock_adapter(void *c)   { (void)c; fmutex_lock(&g_fmutex); }
 static void fmutex_unlock_adapter(void *c) { (void)c; fmutex_unlock(&g_fmutex); }
