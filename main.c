@@ -7,6 +7,7 @@
 extern sync_strategy_t strategy_futex;
 extern sync_strategy_t strategy_adaptive_mutex;
 extern sync_strategy_t strategy_mcs_lock;
+extern sync_strategy_t strategy_pthread_mutex;
 
 static struct option long_options[] = {
     {"lock",         required_argument, 0, 0},
@@ -39,16 +40,19 @@ int main(int argc, char *argv[])
 
     // TODO: parameters validation and improvements
 
-    sync_strategy_t *strategy;
+    sync_strategy_t* strategies[] = {
+        NULL,
+        &strategy_pthread_mutex
+    };
     if (strcmp(lock, "futex") == 0)
     {
-        strategy = &strategy_futex;
+        strategies[0] = &strategy_futex;
     } else if (strcmp(lock, "ad_mutex") == 0 || strcmp(lock, "adaptive_mutex") == 0 || strcmp(lock, "adaptive") == 0)
     {
-        strategy = &strategy_adaptive_mutex;
+        strategies[0] = &strategy_adaptive_mutex;
     } else if (strcmp(lock, "mcs_lock") == 0 || strcmp(lock, "mcs") == 0)
     {
-        strategy = &strategy_mcs_lock;
+        strategies[0] = &strategy_mcs_lock;
     } else
     {
         fprintf(stderr, "Strategy %s not recognized\n", lock);
@@ -64,11 +68,16 @@ int main(int argc, char *argv[])
         .non_critical_ns = non_critical_ns,
     };
 
-    benchmark_result_t r = run_benchmark(strategy, &cfg);
+    for (int i = 0; i < 2; i++)
+    {
+        sync_strategy_t* strategy = strategies[i];
+        
+        benchmark_result_t r = run_benchmark(strategy, &cfg);
 
-    printf("%s,%d,%ld,%.4f,%.0f,%d\n",
+        printf("%s,%d,%ld,%.4f,%.0f,%d\n",
             strategy->name, cfg.num_threads, cfg.critical_section_ns,
             r.elapsed_sec, r.ops_per_sec, r.correctness_ok);
+    }
     
     return 0;
 }
