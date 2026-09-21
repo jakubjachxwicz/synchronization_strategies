@@ -2,7 +2,14 @@ CC      = cc
 CFLAGS  = -Wall -Wextra -O2 -pthread -Istrategies
 BUILD   = build
 TARGET  = $(BUILD)/main
-OBJS    = $(BUILD)/main.o $(BUILD)/futex.o $(BUILD)/fmutex.o $(BUILD)/adaptive_mutex.o $(BUILD)/mcs_lock.o $(BUILD)/pthread_mutex_adapter.o $(BUILD)/benchmark.o
+OBJS    = $(BUILD)/main.o \
+		  $(BUILD)/futex.o \
+		  $(BUILD)/fmutex.o \
+		  $(BUILD)/adaptive_mutex.o \
+		  $(BUILD)/mcs_lock.o \
+		  $(BUILD)/pthread_mutex_adapter.o \
+		  $(BUILD)/pthread_spinlock_adapter.o \
+		  $(BUILD)/benchmark.o
 
 .PHONY: all clean
 
@@ -28,6 +35,9 @@ $(BUILD)/mcs_lock.o: strategies/mcs_lock.c strategies/mcs_lock.h strategies/sync
 
 $(BUILD)/pthread_mutex_adapter.o: strategies/pthread_mutex_adapter.c strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/pthread_mutex_adapter.c -o $(BUILD)/pthread_mutex_adapter.o
+
+$(BUILD)/pthread_spinlock_adapter.o: strategies/pthread_spinlock_adapter.c strategies/sync_interface.h | $(BUILD)
+	$(CC) $(CFLAGS) -c strategies/pthread_spinlock_adapter.c -o $(BUILD)/pthread_spinlock_adapter.o
 
 $(BUILD)/benchmark.o: simulation/benchmark.c simulation/benchmark.h strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c simulation/benchmark.c -o $(BUILD)/benchmark.o
