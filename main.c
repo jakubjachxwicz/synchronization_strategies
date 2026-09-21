@@ -8,6 +8,7 @@ extern sync_strategy_t strategy_futex;
 extern sync_strategy_t strategy_adaptive_mutex;
 extern sync_strategy_t strategy_mcs_lock;
 extern sync_strategy_t strategy_pthread_mutex;
+extern sync_strategy_t strategy_pthread_spinlock;
 
 static struct option long_options[] = {
     {"lock",         required_argument, 0, 0},
@@ -42,7 +43,8 @@ int main(int argc, char *argv[])
 
     sync_strategy_t* strategies[] = {
         NULL,
-        &strategy_pthread_mutex
+        &strategy_pthread_mutex,
+        &strategy_pthread_spinlock
     };
     if (strcmp(lock, "futex") == 0)
     {
@@ -68,7 +70,8 @@ int main(int argc, char *argv[])
         .non_critical_ns = non_critical_ns,
     };
 
-    for (int i = 0; i < 2; i++)
+    size_t n = sizeof(strategies) / sizeof(strategies[0]);
+    for (size_t i = 0; i < n; i++)
     {
         sync_strategy_t* strategy = strategies[i];
         
