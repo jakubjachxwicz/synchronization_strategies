@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    printf("strategy,threads,critical_ns,elapsed_sec,ops_per_sec,correct\n");
+    // printf("strategy,threads,critical_ns,elapsed_sec,ops_per_sec,correct\n");
 
     benchmark_config_t cfg = {
         .num_threads = thread_count,
