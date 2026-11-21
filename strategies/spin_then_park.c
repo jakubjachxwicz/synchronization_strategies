@@ -1,5 +1,5 @@
 #include "futex.h"
-#include "adaptive_mutex.h"
+#include "spin_then_park.h"
 #include "sync_interface.h"
 
 #include <stdatomic.h>
@@ -69,8 +69,8 @@ static void ad_mutex_ctx_destroy(void *c) { (void)c; }
 static void ad_mutex_lock_adapter(void *c)   { (void)c; am_lock(&g_ad_mutex); }
 static void ad_mutex_unlock_adapter(void *c) { (void)c; am_unlock(&g_ad_mutex); }
 
-const sync_strategy_t strategy_adaptive_mutex = {
-    .name = "adaptive mutex",
+const sync_strategy_t strategy_spin_then_park = {
+    .name = "spin then park",
     .global_init = ad_mutex_global_init,
     .global_destroy = ad_mutex_global_destroy,
     .thread_ctx_create = ad_mutex_ctx_create,
