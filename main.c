@@ -5,7 +5,7 @@
 #include "simulation/benchmark.h"
 
 extern sync_strategy_t strategy_futex;
-extern sync_strategy_t strategy_adaptive_mutex;
+extern sync_strategy_t strategy_spin_then_park;
 extern sync_strategy_t strategy_mcs_lock;
 extern sync_strategy_t strategy_pthread_mutex;
 extern sync_strategy_t strategy_pthread_spinlock;
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     if (strcmp(lock, "futex") == 0)
     {
         strategies[0] = &strategy_futex;
-    } else if (strcmp(lock, "ad_mutex") == 0 || strcmp(lock, "adaptive_mutex") == 0 || strcmp(lock, "adaptive") == 0)
+    } else if (strcmp(lock, "spin_then_park") == 0 || strcmp(lock, "spin_park") == 0)
     {
-        strategies[0] = &strategy_adaptive_mutex;
+        strategies[0] = &strategy_spin_then_park;
     } else if (strcmp(lock, "mcs_lock") == 0 || strcmp(lock, "mcs") == 0)
     {
         strategies[0] = &strategy_mcs_lock;
