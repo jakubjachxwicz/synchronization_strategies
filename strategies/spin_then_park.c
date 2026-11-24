@@ -35,8 +35,6 @@ void am_lock(ad_mutex_t *m)
         {
             break;
         }
-
-        // verify: neccessity of CPU pause after spinning
     }
 
     if (expected != LOCKED_WAIT)

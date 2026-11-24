@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     sync_strategy_t* strategies[] = {
         NULL,
         &strategy_pthread_mutex,
-        &strategy_pthread_spinlock
+        // &strategy_pthread_spinlock
     };
     if (strcmp(lock, "futex") == 0)
     {
