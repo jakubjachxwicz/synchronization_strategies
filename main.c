@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     sync_strategy_t* strategies[] = {
         NULL,
-        &strategy_pthread_mutex,
+        // &strategy_pthread_mutex,
         // &strategy_pthread_spinlock
     };
     if (strcmp(lock, "futex") == 0)
@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
         
         benchmark_result_t r = run_benchmark(strategy, &cfg);
 
-        printf("%s,%d,%ld,%.4f,%.0f,%d\n",
+        printf("%s,%d,%ld,%.4f,%.0f,%.4f,%d\n",
             strategy->name, cfg.num_threads, cfg.critical_section_ns,
-            r.elapsed_sec, r.ops_per_sec, r.correctness_ok);
+            r.elapsed_sec, r.ops_per_sec, r.fairness, r.correctness_ok);
     }
     
     return 0;
