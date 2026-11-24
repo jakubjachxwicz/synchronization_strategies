@@ -3,9 +3,8 @@
 
 #include <time.h>
 
-// inline void busy_wait_ns(long nanoseconds);
-double array_sum(long *numbers, int n);
-double array_min(long *numbers, int n);
-double array_max(long *numbers, int n);
+double calculate_fairness(long *numbers, int n);
+void busy_wait_ns(long ns);
+long long now_ns();
 
 #endif

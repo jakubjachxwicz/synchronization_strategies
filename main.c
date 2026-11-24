@@ -4,7 +4,7 @@
 #include <string.h>
 #include "simulation/benchmark.h"
 
-extern sync_strategy_t strategy_futex;
+extern sync_strategy_t strategy_mutex;
 extern sync_strategy_t strategy_spin_then_park;
 extern sync_strategy_t strategy_mcs_lock;
 extern sync_strategy_t strategy_pthread_mutex;
@@ -21,7 +21,7 @@ static struct option long_options[] = {
 
 int main(int argc, char *argv[])
 {
-    char* lock = "futex";
+    char* lock = "mutex";
     int thread_count = 4, iterations = 100000;
     long critical_section_ns = 10000, non_critical_ns = 10;
 
@@ -46,9 +46,13 @@ int main(int argc, char *argv[])
         // &strategy_pthread_mutex,
         // &strategy_pthread_spinlock
     };
-    if (strcmp(lock, "futex") == 0)
+    if (strcmp(lock, "pthread") == 0 || (strcmp(lock, "pthread_mutex") == 0))
     {
-        strategies[0] = &strategy_futex;
+        strategies[0] = &strategy_pthread_mutex;
+    } 
+    else if (strcmp(lock, "mutex") == 0)
+    {
+        strategies[0] = &strategy_mutex;
     } else if (strcmp(lock, "spin_then_park") == 0 || strcmp(lock, "spin_park") == 0)
     {
         strategies[0] = &strategy_spin_then_park;
@@ -60,8 +64,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Strategy %s not recognized\n", lock);
         exit(EXIT_FAILURE);
     }
-
-    // printf("strategy,threads,critical_ns,elapsed_sec,ops_per_sec,correct\n");
 
     benchmark_config_t cfg = {
         .num_threads = thread_count,

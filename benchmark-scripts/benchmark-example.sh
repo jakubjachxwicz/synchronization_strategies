@@ -7,7 +7,7 @@ HEADER="n,strategy,threads,cs_ns,elapsed_sec,ops_per_sec,fairness,correct"
 OUT_DIR="$SCRIPT_DIR/example"
 mkdir -p "$OUT_DIR"
 
-for lock in futex spin_then_park mcs ; do
+for lock in pthread_mutex mutex spin_then_park mcs ; do
     OUT="$OUT_DIR/results_${lock}.csv"
     echo "$HEADER" | tee "$OUT"
 

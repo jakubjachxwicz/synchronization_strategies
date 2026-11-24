@@ -11,27 +11,6 @@ static long g_shared_counter;
 static const sync_strategy_t *g_strategy;
 static benchmark_config_t g_cfg;
 
-static void busy_wait_ns(long ns)
-{
-    if (ns <= 0) return;
-    struct timespec start, now;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    long elapsed;
-    do 
-    {
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        elapsed = (now.tv_sec - start.tv_sec) * 1000000000L
-                + (now.tv_nsec - start.tv_nsec);
-    } while (elapsed < ns);
-}
-
-static inline long long now_ns(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec * 1000000000LL + ts.tv_nsec;
-}
-
 static inline void worker_iteration(void *ctx)
 {
     g_strategy->lock(ctx);
@@ -89,10 +68,7 @@ benchmark_result_t run_benchmark(const sync_strategy_t *strategy,
         pthread_join(threads[i], NULL);
     clock_gettime(CLOCK_MONOTONIC, &t_end);
 
-    double left = (double)n * array_min(thread_operation_counter, n) / array_sum(thread_operation_counter, n);
-    double right = array_sum(thread_operation_counter, n) / n / array_max(thread_operation_counter, n);
-    // printf("n: %d, left: %ld, right: %ld, sum: %ld, min: %ld, max: %ld\n", n, left, right, array_sum(thread_operation_counter, n), array_min(thread_operation_counter, n), array_max(thread_operation_counter, n));
-    double fairness = left < right ? left : right;
+    double fairness = calculate_fairness(thread_operation_counter, n);
 
     strategy->global_destroy();
     free(threads);

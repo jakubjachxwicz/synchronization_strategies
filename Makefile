@@ -4,7 +4,7 @@ BUILD   = build
 TARGET  = $(BUILD)/main
 OBJS    = $(BUILD)/main.o \
 		  $(BUILD)/futex.o \
-		  $(BUILD)/fmutex.o \
+		  $(BUILD)/mutex.o \
 		  $(BUILD)/spin_then_park.o \
 		  $(BUILD)/mcs_lock.o \
 		  $(BUILD)/pthread_mutex_adapter.o \
@@ -25,8 +25,8 @@ $(BUILD)/main.o: main.c simulation/benchmark.h strategies/sync_interface.h | $(B
 $(BUILD)/futex.o: strategies/futex.c strategies/futex.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/futex.c -o $(BUILD)/futex.o
 
-$(BUILD)/fmutex.o: strategies/fmutex.c strategies/fmutex.h strategies/futex.h strategies/sync_interface.h | $(BUILD)
-	$(CC) $(CFLAGS) -c strategies/fmutex.c -o $(BUILD)/fmutex.o
+$(BUILD)/mutex.o: strategies/mutex.c strategies/mutex.h strategies/futex.h strategies/sync_interface.h | $(BUILD)
+	$(CC) $(CFLAGS) -c strategies/mutex.c -o $(BUILD)/mutex.o
 
 $(BUILD)/spin_then_park.o: strategies/spin_then_park.c strategies/spin_then_park.h strategies/futex.h strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/spin_then_park.c -o $(BUILD)/spin_then_park.o
