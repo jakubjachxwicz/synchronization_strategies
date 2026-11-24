@@ -9,6 +9,7 @@ OBJS    = $(BUILD)/main.o \
 		  $(BUILD)/mcs_lock.o \
 		  $(BUILD)/pthread_mutex_adapter.o \
 		  $(BUILD)/pthread_spinlock_adapter.o \
+		  $(BUILD)/helpers.o \
 		  $(BUILD)/benchmark.o
 
 .PHONY: all clean
@@ -39,7 +40,10 @@ $(BUILD)/pthread_mutex_adapter.o: strategies/pthread_mutex_adapter.c strategies/
 $(BUILD)/pthread_spinlock_adapter.o: strategies/pthread_spinlock_adapter.c strategies/sync_interface.h | $(BUILD)
 	$(CC) $(CFLAGS) -c strategies/pthread_spinlock_adapter.c -o $(BUILD)/pthread_spinlock_adapter.o
 
-$(BUILD)/benchmark.o: simulation/benchmark.c simulation/benchmark.h strategies/sync_interface.h | $(BUILD)
+$(BUILD)/helpers.o: simulation/helpers.c simulation/helpers.h | $(BUILD)
+	$(CC) $(CFLAGS) -c simulation/helpers.c -o $(BUILD)/helpers.o
+
+$(BUILD)/benchmark.o: simulation/benchmark.c simulation/benchmark.h strategies/sync_interface.h simulation/helpers.c | $(BUILD)
 	$(CC) $(CFLAGS) -c simulation/benchmark.c -o $(BUILD)/benchmark.o
 
 $(BUILD):

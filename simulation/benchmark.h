@@ -13,6 +13,7 @@ typedef struct {
 typedef struct {
     double elapsed_sec;
     double ops_per_sec;
+    double fairness;
     long final_counter;
     long expected_counter;
     int correctness_ok;
