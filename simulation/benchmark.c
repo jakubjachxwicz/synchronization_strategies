@@ -5,8 +5,6 @@
 #include <time.h>
 #include <stdio.h>
 
-#define FAIRNESS_MEASUREMENT_MS 600
-
 static long g_shared_counter;
 static const sync_strategy_t *g_strategy;
 static benchmark_config_t g_cfg;
@@ -63,9 +61,18 @@ benchmark_result_t run_benchmark(const sync_strategy_t *strategy,
 
     clock_gettime(CLOCK_MONOTONIC, &t_start);
     for (int i = 0; i < n; i++)
+    {
         pthread_create(&threads[i], NULL, worker, &thread_operation_counter[i]);
+    }
+
+    struct timespec timeout;
+    clock_gettime(CLOCK_MONOTONIC, &timeout);
+    timeout.tv_sec += TIMEOUT_S; 
+    
     for (int i = 0; i < n; i++)
-        pthread_join(threads[i], NULL);
+    {
+        pthread_clockjoin_np(threads[i], NULL, CLOCK_MONOTONIC, &timeout);
+    }
     clock_gettime(CLOCK_MONOTONIC, &t_end);
 
     double fairness = calculate_fairness(thread_operation_counter, n);
