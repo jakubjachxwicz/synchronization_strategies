@@ -1,7 +1,12 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
+#define _GNU_SOURCE
+
 #include "../strategies/sync_interface.h"
+
+#define FAIRNESS_MEASUREMENT_MS 600
+#define TIMEOUT_S 15
 
 typedef struct {
     int num_threads;
