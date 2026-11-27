@@ -7,7 +7,7 @@ HEADER="n,strategy,threads,cs_ns,elapsed_sec,ops_per_sec,fairness,correct"
 OUT_DIR="$SCRIPT_DIR/high-contention"
 mkdir -p "$OUT_DIR"
 
-for lock in mcs_lock ; do
+for lock in pthread mutex spin_then_park mcs_lock ; do
     OUT="$OUT_DIR/results_${lock}.csv"
     echo "$HEADER" | tee "$OUT"
 
